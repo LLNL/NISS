@@ -8,6 +8,7 @@ class StencilSymbl2D:
         """
         :param mat: stencil matrix
         :param center: stencil center: (dim0, dim1), i.e., (y, x)
+        It stores stencils in k-by-3 array
         """
         self.stencil = torch.zeros(mat.size(0) * mat.size(1), 3)
         k = 0
@@ -19,16 +20,17 @@ class StencilSymbl2D:
                 k += 1
 
     def symbol(self, theta0, theta1):
-        symbl = torch.zeros(2)
+        symbl_r = torch.zeros_like(theta0)
+        symbl_i = torch.zeros_like(theta0)
         for k in range(0, self.stencil.size(0)):
             i0 = self.stencil[k, 0]
             i1 = self.stencil[k, 1]
             sv = self.stencil[k, 2]
             x = i0 * theta0 + i1 * theta1
-            symbl[0] += sv * cos(x)
-            symbl[1] += sv * sin(x)
+            symbl_r += sv * cos(x)
+            symbl_i += sv * sin(x)
 
-        symbl = sqrt(symbl[0] * symbl[0] + symbl[1] * symbl[1])
+        symbl = sqrt(symbl_r * symbl_r + symbl_i * symbl_i)
         return symbl
 
 
