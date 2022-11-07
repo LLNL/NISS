@@ -1,5 +1,4 @@
 import torch as torch
-
 from LFA.stencil import StencilSymbl2D
 from LFA.lfa import LFA
 
@@ -50,7 +49,6 @@ if __name__ == "__main__":
     # smoother LFA
     smooth_factor, smooth_symbol = lfa.lfa(smooth_operator)
     print('Smoothing factor is', smooth_factor.item())
-
     # plot
     lfa.plot(smooth_symbol)
 
