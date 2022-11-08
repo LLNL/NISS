@@ -1,5 +1,4 @@
 import torch
-from numpy import pi
 from torch import cos, sin, sqrt
 
 
@@ -38,5 +37,5 @@ if __name__ == "__main__":
     A = -1 / 3 * torch.ones([3, 3])
     A[1, 1] = 8 / 3
     stencil_A = StencilSymbl2D(A, torch.tensor([1, 1]))
-    sym = stencil_A.symbol(pi/4, pi/4)
+    sym = stencil_A.symbol(torch.tensor(torch.pi / 4), torch.tensor(torch.pi / 4))
     print(sym)
