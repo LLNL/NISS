@@ -18,12 +18,12 @@ class LFA:
         :return: the max of and all lfa symbols (over theta) of operator
         """
         all_sym = torch.zeros(self.num_theta, self.num_theta, 4)
-        theta1 = self.theta.reshape(-1, 1).repeat(1, self.num_theta)
-        theta2 = self.theta.reshape(1, -1).repeat(self.num_theta, 1)
-        all_sym[:, :, 0] = operator.lfa_symbol(theta1, theta2)
-        all_sym[:, :, 1] = operator.lfa_symbol(theta1 + torch.pi, theta2)
-        all_sym[:, :, 2] = operator.lfa_symbol(theta1, theta2 + torch.pi)
-        all_sym[:, :, 3] = operator.lfa_symbol(theta1 + torch.pi, theta2 + torch.pi)
+        theta0 = self.theta.reshape(-1, 1).repeat(1, self.num_theta)
+        theta1 = self.theta.reshape(1, -1).repeat(self.num_theta, 1)
+        all_sym[:, :, 0] = operator.lfa_symbol(theta0, theta1)
+        all_sym[:, :, 1] = operator.lfa_symbol(theta0 + torch.pi, theta1)
+        all_sym[:, :, 2] = operator.lfa_symbol(theta0, theta1 + torch.pi)
+        all_sym[:, :, 3] = operator.lfa_symbol(theta0 + torch.pi, theta1 + torch.pi)
 
         max_sym = torch.max(all_sym[:, :, 1:4])
 
