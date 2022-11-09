@@ -26,7 +26,7 @@ class SmoothSymbl2D:
         symbl = self.stencil_m.symbol(theta0, theta1)
         return symbl
 
-    def lfa_symbol(self, theta0, theta1):
+    def symbol(self, theta0, theta1):
         symbl_op = self.operator_symbol(theta0, theta1)
         symbl_sm = self.smoother_symbol(theta0, theta1)
         return abs(1 - symbl_op * symbl_sm)
@@ -47,8 +47,9 @@ if __name__ == "__main__":
     num_theta = 128
     lfa = LFA(num_theta)
     # smoother LFA
-    smooth_factor, smooth_symbol = lfa.lfa(smooth_operator)
+    smooth_symbol = lfa.lfa(smooth_operator)
+    smooth_factor = torch.max(smooth_symbol[:, :, 1:4])
     print('Smoothing factor is', smooth_factor.item())
     # plot
-    lfa.plot(smooth_symbol)
+    lfa.plot(smooth_symbol, title='Smoothing factor', num_levels=10)
 

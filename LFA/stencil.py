@@ -1,5 +1,6 @@
 import torch
 from torch import cos, sin, sqrt
+from LFA.lfa import LFA
 
 
 class StencilSymbl2D:
@@ -38,4 +39,12 @@ if __name__ == "__main__":
     A[1, 1] = 8 / 3
     stencil_A = StencilSymbl2D(A, torch.tensor([1, 1]))
     sym = stencil_A.symbol(torch.tensor(torch.pi / 4), torch.tensor(torch.pi / 4))
-    print(sym)
+    print('(pi/4, pi/4): ', sym.item())
+    # lfa
+    num_theta = 128
+    lfa = LFA(num_theta)
+    # smoother LFA
+    symbol_A = lfa.lfa(stencil_A)
+    print('symbol A: ', 'max: ', torch.max(symbol_A).item(), 'min: ', torch.min(symbol_A).item())
+    # plot
+    lfa.plot(symbol_A, title='Operator A', num_levels=20)
