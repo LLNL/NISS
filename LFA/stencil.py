@@ -4,12 +4,14 @@ from LFA.lfa import LFA
 
 
 class StencilSymbl2D:
-    def __init__(self, mat, center):
+    def __init__(self, mat, center, symmetric=True):
         """
         :param mat: stencil matrix
         :param center: stencil center: (dim0, dim1), i.e., (y, x)
+        :param symmetric: if the stencil is symmetric
         It stores stencils in k-by-3 array
         """
+        self.symmetric = symmetric
         self.stencil = torch.zeros(mat.size(0) * mat.size(1), 3)
         k = 0
         for i0 in range(0, mat.size(0)):
@@ -38,8 +40,8 @@ if __name__ == "__main__":
     A = -1 / 3 * torch.ones([3, 3])
     A[1, 1] = 8 / 3
     stencil_A = StencilSymbl2D(A, torch.tensor([1, 1]))
-    sym = stencil_A.symbol(torch.tensor(torch.pi / 4), torch.tensor(torch.pi / 4))
-    print('(pi/4, pi/4): ', sym.item())
+    # symbol_A = stencil_A.symbol(torch.tensor(torch.pi / 4), torch.tensor(torch.pi / 4))
+    # print('(pi/4, pi/4): ', symbol_A.item())
     # lfa
     num_theta = 128
     lfa = LFA(num_theta)
