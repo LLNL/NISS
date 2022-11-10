@@ -13,9 +13,9 @@ class LFA:
         h_theta = torch.pi / num_theta
         self.theta = torch.linspace(-torch.pi / 2 + h_theta / 2, torch.pi / 2 - h_theta / 2, num_theta)
 
-    def lfa(self, operator):
+    def lfa(self, operator, num_quadrant=4):
         """
-        :return: the max of and all lfa symbols (over theta) of operator
+        :return: all lfa symbols (over theta) of operator
         """
         all_sym = torch.zeros(self.num_theta, self.num_theta, 4)
         theta0 = self.theta.reshape(-1, 1).repeat(1, self.num_theta)
