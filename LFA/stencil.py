@@ -1,6 +1,6 @@
 import torch
 from torch import cos, sin, sqrt
-from LFA.lfa import LFA
+from LFA.lfa import LFA2D
 
 
 class StencilSymbl2D:
@@ -21,14 +21,14 @@ class StencilSymbl2D:
                 self.stencil[k, 2] = mat[i0, i1]
                 k += 1
 
-    def symbol(self, theta0, theta1):
-        symbl_r = torch.zeros_like(theta0)
-        symbl_i = torch.zeros_like(theta0)
+    def symbol(self, theta_grid):
+        symbl_r = torch.zeros_like(theta_grid[:, :, 0])
+        symbl_i = torch.zeros_like(theta_grid[:, :, 0])
         for k in range(0, self.stencil.size(0)):
             i0 = self.stencil[k, 0]
             i1 = self.stencil[k, 1]
             sv = self.stencil[k, 2]
-            x = i0 * theta0 + i1 * theta1
+            x = i0 * theta_grid[:, :, 0] + i1 * theta_grid[:, :, 1]
             symbl_r += sv * cos(x)
             symbl_i += sv * sin(x)
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     # print('(pi/4, pi/4): ', symbol_A.item())
     # lfa
     num_theta = 128
-    lfa = LFA(num_theta)
+    lfa = LFA2D(num_theta)
     # smoother LFA
     symbol_A = lfa.lfa(stencil_A)
     print('symbol A: ', 'max: ', torch.max(symbol_A).item(), 'min: ', torch.min(symbol_A).item())

@@ -1,6 +1,6 @@
 import torch as torch
 from LFA.stencil import StencilSymbl2D
-from LFA.lfa import LFA
+from LFA.lfa import LFA2D
 
 
 class SmoothSymbl2D:
@@ -18,17 +18,17 @@ class SmoothSymbl2D:
         self.nu_pre = nu_pre
         self.nu_post = nu_post
 
-    def operator_symbol(self, theta0, theta1):
-        symbl = self.stencil_a.symbol(theta0, theta1)
+    def operator_symbol(self, theta_grid):
+        symbl = self.stencil_a.symbol(theta_grid)
         return symbl
 
-    def smoother_symbol(self, theta0, theta1):
-        symbl = self.stencil_m.symbol(theta0, theta1)
+    def smoother_symbol(self, theta_grid):
+        symbl = self.stencil_m.symbol(theta_grid)
         return symbl
 
-    def symbol(self, theta0, theta1):
-        symbl_op = self.operator_symbol(theta0, theta1)
-        symbl_sm = self.smoother_symbol(theta0, theta1)
+    def symbol(self, theta_grid):
+        symbl_op = self.operator_symbol(theta_grid)
+        symbl_sm = self.smoother_symbol(theta_grid)
         return abs(1 - symbl_op * symbl_sm)
 
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     smooth_operator = SmoothSymbl2D(A, center, M, center)
     # lfa
     num_theta = 128
-    lfa = LFA(num_theta)
+    lfa = LFA2D(num_theta)
     # smoother LFA
     smooth_symbol = lfa.lfa(smooth_operator)
     smooth_factor = torch.max(smooth_symbol[:, :, 1:4])
