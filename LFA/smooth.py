@@ -18,18 +18,33 @@ class SmoothSymbl2D:
         self.nu_pre = nu_pre
         self.nu_post = nu_post
 
-    def operator_symbol(self, theta_grid):
-        symbl = self.stencil_a.symbol(theta_grid)
+    def operator_symbol(self, theta):
+        symbl = self.stencil_a.symbol(theta)
         return symbl
 
-    def smoother_symbol(self, theta_grid):
-        symbl = self.stencil_m.symbol(theta_grid)
+    def smoother_symbol(self, theta):
+        symbl = self.stencil_m.symbol(theta)
         return symbl
 
-    def symbol(self, theta_grid):
-        symbl_op = self.operator_symbol(theta_grid)
-        symbl_sm = self.smoother_symbol(theta_grid)
-        return abs(1 - symbl_op * symbl_sm)
+    def symmetric(self):
+        return self.stencil_a.symmetric() and self.stencil_m.symmetric()
+
+    def symbol(self, theta):
+        operator_symbl = self.operator_symbol(theta)
+        smoother_symbl = self.smoother_symbol(theta)
+        symbol = torch.zeros_like(operator_symbl)
+        if self.symmetric():
+            symbol[0, :] = 1 - operator_symbl[0, :] * smoother_symbl[0, :]
+        else:
+            symbol[0, :] = 1 - operator_symbl[0, :] * smoother_symbl[0, :] + operator_symbl[1, :] * smoother_symbl[1, :]
+            symbol[1, :] = operator_symbl[1, :] * smoother_symbl[0, :] + operator_symbl[0, :] * smoother_symbl[1, :]
+
+        return symbol
+
+    @staticmethod
+    def smoothing_factor(symbol):
+        smoothing_factor = torch.max(torch.norm(symbol[:, :, 1:4], dim=0))
+        return smoothing_factor
 
 
 if __name__ == "__main__":
@@ -48,8 +63,7 @@ if __name__ == "__main__":
     lfa = LFA2D(num_theta)
     # smoother LFA
     smooth_symbol = lfa.lfa(smooth_operator)
-    smooth_factor = torch.max(smooth_symbol[:, :, 1:4])
+    smooth_factor = smooth_operator.smoothing_factor(smooth_symbol)
     print('Smoothing factor is', smooth_factor.item())
     # plot
-    lfa.plot(smooth_symbol, title='Smoothing factor', num_levels=10)
-
+    lfa.plot(torch.norm(smooth_symbol, dim=0), title='Smoothing factor', num_levels=10)
