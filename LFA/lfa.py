@@ -17,8 +17,8 @@ class LFA2D:
         self.theta_grid[:, :, 0] = self.theta.reshape(-1, 1).repeat(1, num_theta)
         self.theta_grid[:, :, 1] = self.theta.reshape(1, -1).repeat(num_theta, 1)
         # theta grids in all quadrants: [num_theta, num_theta, dim=2, num_quad]
-        self.quad = torch.tensor([[0, 0,        torch.pi, torch.pi],
-                                  [0, torch.pi, 0,        torch.pi]])[:, quadrant]
+        self.quad = torch.tensor([[0, torch.pi,        0, torch.pi],
+                                  [0,        0, torch.pi, torch.pi]])[:, quadrant]
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
 
     def lfa(self, operator):
