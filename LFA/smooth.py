@@ -43,7 +43,7 @@ class SmoothSymbl2D:
 
     @staticmethod
     def smoothing_factor(symbol):
-        smoothing_factor = torch.max(torch.norm(symbol[:, :, 1:4], dim=0))
+        smoothing_factor = torch.max(torch.norm(symbol[:, :, :, 1:4], dim=0))
         return smoothing_factor
 
 
