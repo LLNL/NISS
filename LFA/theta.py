@@ -4,14 +4,17 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 
-class LFA2D:
-    def __init__(self, num_theta, quadrant=torch.tensor([0, 1, 2, 3])):
+class Theta2D:
+    def __init__(self, num_theta, start=-torch.pi / 2, end=torch.pi / 2, quadrant=torch.tensor([0, 1, 2, 3])):
         """
         :param num_theta: the number of points in theta grid
+        :param start:
+        :param end:
+        :param quadrant:
         """
         self.num_theta = num_theta
-        self.h_theta = torch.pi / num_theta
-        self.theta = torch.linspace(-torch.pi / 2 + self.h_theta / 2, torch.pi / 2 - self.h_theta / 2, num_theta)
+        self.h_theta = (end - start) / num_theta
+        self.theta = torch.linspace(start + self.h_theta / 2, end - self.h_theta / 2, num_theta)
         # theta grid
         self.theta_grid = torch.empty(num_theta, num_theta, 2)
         self.theta_grid[:, :, 0] = self.theta.reshape(-1, 1).repeat(1, num_theta)
@@ -20,13 +23,6 @@ class LFA2D:
         self.quad = torch.tensor([[0, torch.pi,        0, torch.pi],
                                   [0,        0, torch.pi, torch.pi]])[:, quadrant]
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
-
-    def lfa(self, operator):
-        """
-        :return: all lfa symbols (over theta) of operator
-        """
-        symbol = operator.symbol(self.theta_quad)
-        return symbol
 
     def plot(self, all_symbol, title, num_levels=10):
         """

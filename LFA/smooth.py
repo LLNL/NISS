@@ -1,6 +1,6 @@
 import torch as torch
 from LFA.stencil import StencilSymbl2D
-from LFA.lfa import LFA2D
+from LFA.theta import Theta2D
 
 
 class SmoothSymbl2D:
@@ -18,20 +18,24 @@ class SmoothSymbl2D:
         self.nu_pre = nu_pre
         self.nu_post = nu_post
 
-    def operator_symbol(self, theta):
-        symbl = self.stencil_a.symbol(theta)
+    def setup_theta(self, theta):
+        self.stencil_m.setup_theta(theta)
+        self.stencil_a.setup_theta(theta)
+
+    def operator_symbol(self):
+        symbl = self.stencil_a.symbol()
         return symbl
 
-    def smoother_symbol(self, theta):
-        symbl = self.stencil_m.symbol(theta)
+    def smoother_symbol(self):
+        symbl = self.stencil_m.symbol()
         return symbl
 
     def symmetric(self):
         return self.stencil_a.symmetric() and self.stencil_m.symmetric()
 
-    def symbol(self, theta):
-        operator_symbl = self.operator_symbol(theta)
-        smoother_symbl = self.smoother_symbol(theta)
+    def symbol(self):
+        operator_symbl = self.operator_symbol()
+        smoother_symbl = self.smoother_symbol()
         symbol = torch.zeros_like(operator_symbl)
         if self.symmetric():
             symbol[0, :] = 1 - operator_symbl[0, :] * smoother_symbl[0, :]
@@ -58,12 +62,12 @@ if __name__ == "__main__":
     center = torch.tensor([1, 1])
     # smoother
     smooth_operator = SmoothSymbl2D(A, center, M, center)
-    # lfa
-    num_theta = 128
-    lfa = LFA2D(num_theta)
+    # theta grid
+    theta_grid = Theta2D(128)
+    smooth_operator.setup_theta(theta_grid)
     # smoother LFA
-    smooth_symbol = lfa.lfa(smooth_operator)
+    smooth_symbol = smooth_operator.symbol()
     smooth_factor = smooth_operator.smoothing_factor(smooth_symbol)
     print('Smoothing factor is', smooth_factor.item())
     # plot
-    lfa.plot(torch.norm(smooth_symbol, dim=0), title='Smoothing factor', num_levels=10)
+    theta_grid.plot(torch.norm(smooth_symbol, dim=0), title='Smoothing factor', num_levels=10)
