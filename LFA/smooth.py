@@ -55,13 +55,18 @@ if __name__ == "__main__":
     # stencil for A
     A = -1 / 3 * torch.ones([3, 3])
     A[1, 1] = 8 / 3
+    center_A = torch.tensor([1, 1])
     # stencil for M
-    M = -1 / 3 * torch.zeros([3, 3])
-    M[1, 1] = 1 / 3
-    #
-    center = torch.tensor([1, 1])
+    stencil_M_size = 3
+    if stencil_M_size == 3:
+        M = torch.zeros([3, 3])
+        M[1, 1] = 1 / 3
+        center_M = torch.tensor([1, 1])
+    elif stencil_M_size == 1:
+        M = 1 / 3 * torch.ones([1, 1])
+        center_M = torch.tensor([0, 0])
     # smoother
-    smooth_operator = SmoothSymbl2D(A, center, M, center)
+    smooth_operator = SmoothSymbl2D(A, center_A, M, center_M)
     # theta grid
     theta_grid = Theta2D(128)
     smooth_operator.setup_theta(theta_grid)
