@@ -17,9 +17,12 @@ class Theta2D:
         self.theta = torch.linspace(start + self.h_theta / 2, end - self.h_theta / 2, num_theta)
         # theta grid
         self.theta_grid = torch.empty(num_theta, num_theta, 2)
-        self.theta_grid[:, :, 0] = self.theta.reshape(-1, 1).repeat(1, num_theta)
-        self.theta_grid[:, :, 1] = self.theta.reshape(1, -1).repeat(num_theta, 1)
+        self.theta_grid[:, :, 0] = self.theta.reshape(-1, 1).repeat(1, num_theta)  # Y-dim
+        self.theta_grid[:, :, 1] = self.theta.reshape(1, -1).repeat(num_theta, 1)  # X-dim
         # theta grids in all quadrants: [num_theta, num_theta, dim=2, num_quad]
+        self.quadrant = quadrant
+        # mesh quad    ^  [1, 3     -> x
+        #            y |   0, 2]
         self.quad = torch.tensor([[0, torch.pi,        0, torch.pi],
                                   [0,        0, torch.pi, torch.pi]])[:, quadrant]
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
@@ -33,10 +36,12 @@ class Theta2D:
         theta_plot[0:self.num_theta] = self.theta
         theta_plot[self.num_theta: 2 * self.num_theta] = self.theta + torch.pi
         smooth_symbol_plot = np.zeros((2 * self.num_theta, 2 * self.num_theta))
-        smooth_symbol_plot[0:self.num_theta, 0:self.num_theta] = all_symbol[:, :, 0]
-        smooth_symbol_plot[self.num_theta:2 * self.num_theta, 0:self.num_theta] = all_symbol[:, :, 1]
-        smooth_symbol_plot[0:self.num_theta, self.num_theta:2 * self.num_theta] = all_symbol[:, :, 2]
-        smooth_symbol_plot[self.num_theta:2 * self.num_theta, self.num_theta:2 * self.num_theta] = all_symbol[:, :, 3]
+        for j in range(self.quadrant.numel()):
+            i = self.quadrant[j].item()
+            ix = i // 2
+            iy = i - ix * 2
+            smooth_symbol_plot[iy * self.num_theta:(iy + 1) * self.num_theta,
+                               ix * self.num_theta:(ix + 1) * self.num_theta] = all_symbol[:, :, j]
         cp = plt.contour(theta_plot, theta_plot, smooth_symbol_plot, levels=num_levels)
         plt.clabel(cp, fontsize=8, colors='black')
         norm = colors.Normalize(vmin=cp.cvalues.min(), vmax=cp.cvalues.max())
