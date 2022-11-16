@@ -46,11 +46,8 @@ class SmoothSymbl2D:
         return symbol
 
     @staticmethod
-    def smoothing_factor(symbol, quad_index=None):
-        if quad_index is None:
-            smoothing_factor = torch.max(torch.norm(symbol[:, :, :, :], dim=0))
-        else:
-            smoothing_factor = torch.max(torch.norm(symbol[:, :, :, quad_index], dim=0))
+    def smoothing_factor(symbol):
+        smoothing_factor = torch.max(torch.norm(symbol, dim=0))
         return smoothing_factor
 
 
@@ -75,7 +72,7 @@ if __name__ == "__main__":
     smooth_operator.setup_theta(theta_grid)
     # smoother LFA
     smooth_symbol = smooth_operator.symbol()
-    smooth_factor = smooth_operator.smoothing_factor(smooth_symbol, quad_index=torch.tensor([1, 2, 3]))
+    smooth_factor = smooth_operator.smoothing_factor(smooth_symbol[:, :, :, 1:4])
     print('Smoothing factor is', smooth_factor.item())
     # plot
     theta_grid.plot(torch.norm(smooth_symbol, dim=0), title='Smoothing factor', num_levels=10)
