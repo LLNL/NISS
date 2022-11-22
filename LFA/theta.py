@@ -19,12 +19,13 @@ class Theta2D:
         self.theta_grid = torch.empty(num_theta, num_theta, 2)
         self.theta_grid[:, :, 0] = self.theta.reshape(-1, 1).repeat(1, num_theta)  # Y-dim
         self.theta_grid[:, :, 1] = self.theta.reshape(1, -1).repeat(num_theta, 1)  # X-dim
-        # theta grids in all quadrants: [num_theta, num_theta, dim=2, num_quad]
+        # theta grids in all quadrants:
         self.quadrant = quadrant
         # mesh quad    ^  [1, 3     -> x
         #            y |   0, 2]
         self.quad = torch.tensor([[0, torch.pi,        0, torch.pi],
                                   [0,        0, torch.pi, torch.pi]])[:, quadrant]
+        # (num_theta_x, num_theta_y, dim = 2, num_quad)
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
 
     def plot(self, all_symbol, title, num_levels=10):
@@ -53,4 +54,3 @@ class Theta2D:
         ax.set_title(title, fontfamily='sans-serif', fontweight='bold', fontsize=14)
         ax.set_xlabel(r'$\theta_x\in(-0.5\pi, 1.5\pi)$', fontsize=14)
         ax.set_ylabel(r'$\theta_y\in(-0.5\pi, 1.5\pi)$', fontsize=14)
-        plt.show()
