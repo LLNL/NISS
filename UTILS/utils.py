@@ -33,7 +33,10 @@ def centrosymmetric_strict_upper_coord(n: int):
 
 
 def centrosymmetric_strict_lower_coord(n: int):
-    return np.unravel_index(range(0, (n * n) // 2), (n, n), 'C')
+    if n <= 1:
+        return [], []
+    else:
+        return np.unravel_index(range(0, (n * n) // 2), (n, n), 'C')
 
 
 def centrosymmetric_upper_coord(n: int):
