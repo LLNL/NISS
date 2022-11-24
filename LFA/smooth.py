@@ -104,7 +104,7 @@ if __name__ == "__main__":
     smooth_factor = torch.max(smooth_symbol_mod[:, :, 1:4])
     print('Smoothing factor is', smooth_factor.item())
     # plot
-    theta_grid.plot(smooth_symbol_mod, title='Smoothing factor', num_levels=32)
+    theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor.item():.3f}', num_levels=32)
 
     # Smoother 2:
     # stencil for M
@@ -129,6 +129,6 @@ if __name__ == "__main__":
     smooth_factor = torch.max(smooth_symbol_mod[:, :, 1:4])
     print('Smoothing factor is', smooth_factor.item())
     # plot
-    theta_grid.plot(smooth_symbol_mod, title='Smoothing factor', num_levels=32)
+    theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor.item():.3f}', num_levels=32)
 
     plt.show()
