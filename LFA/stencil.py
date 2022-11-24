@@ -44,7 +44,7 @@ class StencilSymbl2D:
         if vmatrix is None:
             self.stencil_value = None
         else:
-            self.stencil_value = torch.zeros(1, self.stencil_value_len)
+            self.stencil_value = torch.zeros(self.stencil_value_len)
         # fill stencil data in the arrays
         k = 0
         ks = 0
@@ -56,7 +56,7 @@ class StencilSymbl2D:
                     k += 1
                     if not self.symmetric or i * nx + j <= (nx * ny - 1) / 2:
                         if vmatrix is not None:
-                            self.stencil_value[0, ks] = vmatrix[i, j]
+                            self.stencil_value[ks] = vmatrix[i, j]
                         ks += 1
         # for symmetric stencil, construct a matrix that extends to full stencil
         if self.symmetric:
@@ -95,7 +95,7 @@ class StencilSymbl2D:
 
     def symbol(self):
         if self.symmetric:
-            value = torch.mm(self.stencil_value, self.sym_extend)
+            value = torch.mm(self.stencil_value.unsqueeze(0), self.sym_extend)
         else:
             value = self.stencil_value
         symbol = torch.sum(value * self.cos_sin_theta_stencil, dim=-1)
@@ -123,5 +123,6 @@ if __name__ == "__main__":
     stencil_symbol_mod = torch.norm(stencil_symbol, dim=0)
     print('symbol A: ', 'max: ', torch.max(stencil_symbol_mod).item(), 'min: ', torch.min(stencil_symbol_mod).item())
     # plot
-    theta_grid.plot(stencil_symbol_mod, title='Operator A', num_levels=20)
+    theta_grid.plot(stencil_symbol_mod, title=f'Operator A symbol ({torch.min(stencil_symbol_mod).item():.2e}, '
+                                              f'{torch.max(stencil_symbol_mod).item():.2e})', num_levels=20)
     plt.show()
