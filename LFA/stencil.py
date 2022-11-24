@@ -1,3 +1,4 @@
+import warnings
 import torch
 # import numpy as np
 import matplotlib.pyplot as plt
@@ -5,17 +6,26 @@ from LFA.theta import Theta2D
 
 
 class StencilSymbl2D:
-    def __init__(self, pattern, center, mat=None, centrosymmetric=False):
+    symmetric: bool
+    stencil_shape_len: int
+    stencil_value_len: int
+    stencil_shape: torch.tensor
+    stencil_value: torch.tensor
+    sym_extend: torch.tensor
+    theta_stencil: torch.tensor
+    cos_sin_theta_stencil: torch.tensor
+
+    def __init__(self, pattern, center, vmatrix=None, centrosymmetric=False):
         """
         :param pattern: stencil pattern: boolean
         :param center[2]: stencil center in (dim0, dim1), i.e., (y, x)
-        :param mat: stencil values
+        :param vmatrix: stencil value matrix
         :param centrosymmetric: if the stencil is symmetric (mat and pattern are centrosymmetric)
         """
         # size in x and y
         nx = pattern.size(1)
         ny = pattern.size(0)
-        # stencil is symmetric if mat and pattern are centrosymmetric
+        # stencil is symmetric if vmatrix and pattern are centrosymmetric
         self.symmetric = centrosymmetric
         # k: number of stencil entries; ks: in the lower-symmetric part
         k = 0
@@ -31,7 +41,7 @@ class StencilSymbl2D:
         self.stencil_value_len = ks
         # stores stencils in arrays
         self.stencil_shape = torch.zeros(2, self.stencil_shape_len)
-        if mat is None:
+        if vmatrix is None:
             self.stencil_value = None
         else:
             self.stencil_value = torch.zeros(1, self.stencil_value_len)
@@ -45,8 +55,8 @@ class StencilSymbl2D:
                     self.stencil_shape[1, k] = j - center[1]
                     k += 1
                     if not self.symmetric or i * nx + j <= (nx * ny - 1) / 2:
-                        if mat is not None:
-                            self.stencil_value[0, ks] = mat[i, j]
+                        if vmatrix is not None:
+                            self.stencil_value[0, ks] = vmatrix[i, j]
                         ks += 1
         # for symmetric stencil, construct a matrix that extends to full stencil
         if self.symmetric:
@@ -76,6 +86,12 @@ class StencilSymbl2D:
         else:
             # (2, nx, ny, n_quad, stencil_shape_len)
             self.cos_sin_theta_stencil = torch.stack([torch.cos(self.theta_stencil), torch.sin(self.theta_stencil)])
+
+    def set_values(self, values: torch.tensor):
+        if self.stencil_value is not None:
+            if self.stencil_value.shape != values.shape:
+                warnings.warn(f"Incompatible input stencil value shape {self.stencil_value.shape} and {values.shape}")
+        self.stencil_value = values.clone()
 
     def symbol(self):
         if self.symmetric:

@@ -7,18 +7,38 @@ import matplotlib.pyplot as plt
 
 
 class SmoothSymbl2D:
-    def __init__(self, pattern_a, center_a, pattern_m, center_m, mat_a=None, centrosymmetric_a=False, mat_m=None,
-                 centrosymmetric_m=False, nu_pre=1, nu_post=0):
+    smoother_stencil: StencilSymbl2D
+    operator_stencil: StencilSymbl2D
+    nu_pre: int
+    nu_post: int
+
+    def __init__(self, pattern_a=None, center_a=None, pattern_m=None, center_m=None,
+                 mat_a=None, centrosymmetric_a=False, mat_m=None, centrosymmetric_m=False,
+                 stencil_a=None, stencil_m=None, nu_pre=1, nu_post=0):
         """
-        :param mat_a:
+        :param pattern_a:
         :param center_a:
-        :param mat_m:
+        :param pattern_m:
         :param center_m:
+        :param mat_a:
+        :param centrosymmetric_a:
+        :param mat_m:
+        :param centrosymmetric_m:
+        :param stencil_a:
+        :param stencil_m:
         :param nu_pre:
         :param nu_post:
         """
-        self.smoother_stencil = StencilSymbl2D(pattern_m, center_m, mat_m, centrosymmetric_m)
-        self.operator_stencil = StencilSymbl2D(pattern_a, center_a, mat_a, centrosymmetric_a)
+        if stencil_m is None:
+            self.smoother_stencil = StencilSymbl2D(pattern_m, center_m, mat_m, centrosymmetric_m)
+        else:
+            self.smoother_stencil = stencil_m
+
+        if stencil_a is None:
+            self.operator_stencil = StencilSymbl2D(pattern_a, center_a, mat_a, centrosymmetric_a)
+        else:
+            self.operator_stencil = stencil_a
+
         self.nu_pre = nu_pre
         self.nu_post = nu_post
 
@@ -73,7 +93,8 @@ if __name__ == "__main__":
     if M_symmetric and M_size > 1:
         M[centrosymmetric_strict_upper_coord(M_size)] = 0
     # smoothing operator
-    smooth_operator = SmoothSymbl2D(pattern_A, center_A, pattern_M, center_M,
+    smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
+                                    pattern_m=pattern_M, center_m=center_M,
                                     mat_a=A, centrosymmetric_a=A_symmetric,
                                     mat_m=M, centrosymmetric_m=M_symmetric)
     smooth_operator.setup_theta(theta_grid)
@@ -97,7 +118,8 @@ if __name__ == "__main__":
     if M_symmetric and M_size > 1:
         M[centrosymmetric_strict_upper_coord(M_size)] = 0
     # smoother
-    smooth_operator = SmoothSymbl2D(pattern_A, center_A, pattern_M, center_M,
+    smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
+                                    pattern_m=pattern_M, center_m=center_M,
                                     mat_a=A, centrosymmetric_a=A_symmetric,
                                     mat_m=M, centrosymmetric_m=M_symmetric)
     smooth_operator.setup_theta(theta_grid)
