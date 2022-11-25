@@ -29,9 +29,6 @@ class Theta2D:
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
 
     def plot(self, all_symbol, title, num_levels=10):
-        """
-        :return: plot LFA
-        """
         fig, ax = plt.subplots()
         theta_plot = np.zeros(2 * self.num_theta)
         theta_plot[0:self.num_theta] = self.theta

@@ -1,9 +1,8 @@
-# import numpy as np
-# import torch
-from LFA.stencil import StencilSymbl2D
-from LFA.theta import Theta2D
-from UTILS.utils import *
+import torch
 import matplotlib.pyplot as plt
+from lfa.stencil import StencilSymbl2D
+from lfa.theta import Theta2D
+import utils
 
 
 class SmoothSymbl2D:
@@ -58,7 +57,7 @@ class SmoothSymbl2D:
         return self.operator_stencil.is_symmetric() and self.smoother_stencil.is_symmetric()
 
     def symbol(self):
-        symbol = complex_multiply(self.operator_symbol(), self.smoother_symbol())
+        symbol = utils.complex_multiply(self.operator_symbol(), self.smoother_symbol())
         if symbol.size(0) == 1:
             symbol = 1 - symbol
         else:
@@ -80,7 +79,7 @@ if __name__ == "__main__":
     A[center_A[0], center_A[1]] = 8 / 3
     # zero out "strict-upper" part to test centrosymmetric
     if A_symmetric and A_size > 1:
-        A[centrosymmetric_strict_upper_coord(A_size)] = 0
+        A[utils.centrosymmetric_strict_upper_coord(A_size)] = 0
 
     # Smoother 1:
     # stencil for M
@@ -91,7 +90,7 @@ if __name__ == "__main__":
     M[center_M[0], center_M[1]] = 1 / 3
     # zero out "strict-upper" part to test centrosymmetric
     if M_symmetric and M_size > 1:
-        M[centrosymmetric_strict_upper_coord(M_size)] = 0
+        M[utils.centrosymmetric_strict_upper_coord(M_size)] = 0
     # smoothing operator
     smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
                                     pattern_m=pattern_M, center_m=center_M,
@@ -116,7 +115,7 @@ if __name__ == "__main__":
     M = M * (2 / 51)
     # zero out "strict-upper" part to test centrosymmetric
     if M_symmetric and M_size > 1:
-        M[centrosymmetric_strict_upper_coord(M_size)] = 0
+        M[utils.centrosymmetric_strict_upper_coord(M_size)] = 0
     # smoother
     smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
                                     pattern_m=pattern_M, center_m=center_M,

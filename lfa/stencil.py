@@ -1,8 +1,7 @@
 import warnings
 import torch
-# import numpy as np
 import matplotlib.pyplot as plt
-from LFA.theta import Theta2D
+from lfa.theta import Theta2D
 
 
 class StencilSymbl2D:
