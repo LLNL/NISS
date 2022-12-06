@@ -1,3 +1,4 @@
+import sys
 import torch
 import matplotlib.pyplot as plt
 from lfa.stencil import StencilSymbl2D
@@ -65,69 +66,79 @@ class SmoothSymbl2D:
         return symbol
 
 
-if __name__ == "__main__":
+def main(do_print=True, do_plot=True):
     # centrosymmetric
-    A_symmetric = True
-    M_symmetric = True
+    a_symmetric = True
+    m_symmetric = True
     # theta grid
     theta_grid = Theta2D(128, quadrant=torch.tensor([0, 1, 2, 3]))
     # stencil for A
-    A_size = 3
-    pattern_A = torch.ones([A_size, A_size])
-    A = -torch.ones([A_size, A_size]) / 3
-    center_A = torch.tensor([A_size // 2, A_size // 2])
-    A[center_A[0], center_A[1]] = 8 / 3
+    a_size = 3
+    pattern_a = torch.ones([a_size, a_size])
+    mat_a = -torch.ones([a_size, a_size]) / 3
+    center_a = torch.tensor([a_size // 2, a_size // 2])
+    mat_a[center_a[0], center_a[1]] = 8 / 3
     # zero out "strict-upper" part to test centrosymmetric
-    if A_symmetric and A_size > 1:
-        A[utils.centrosymmetric_strict_upper_coord(A_size)] = 0
+    if a_symmetric and a_size > 1:
+        mat_a[utils.centrosymmetric_strict_upper_coord(a_size)] = 0
 
-    # Smoother 1:
+    # Smoother 1 (point-wise):
     # stencil for M
-    M_size = 1
-    pattern_M = torch.ones([M_size, M_size])
-    M = torch.zeros([M_size, M_size])
-    center_M = torch.tensor([M_size // 2, M_size // 2])
-    M[center_M[0], center_M[1]] = 1 / 3
+    m_size = 1
+    pattern_m = torch.ones([m_size, m_size])
+    mat_m = torch.zeros([m_size, m_size])
+    center_m = torch.tensor([m_size // 2, m_size // 2])
+    mat_m[center_m[0], center_m[1]] = 1 / 3
     # zero out "strict-upper" part to test centrosymmetric
-    if M_symmetric and M_size > 1:
-        M[utils.centrosymmetric_strict_upper_coord(M_size)] = 0
+    if m_symmetric and m_size > 1:
+        mat_m[utils.centrosymmetric_strict_upper_coord(m_size)] = 0
     # smoothing operator
-    smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
-                                    pattern_m=pattern_M, center_m=center_M,
-                                    mat_a=A, centrosymmetric_a=A_symmetric,
-                                    mat_m=M, centrosymmetric_m=M_symmetric)
+    smooth_operator = SmoothSymbl2D(pattern_a=pattern_a, center_a=center_a,
+                                    pattern_m=pattern_m, center_m=center_m,
+                                    mat_a=mat_a, centrosymmetric_a=a_symmetric,
+                                    mat_m=mat_m, centrosymmetric_m=m_symmetric)
     smooth_operator.setup_theta(theta_grid)
     # smoother LFA
     smooth_symbol = smooth_operator.symbol()
     smooth_symbol_mod = torch.norm(smooth_symbol, dim=0)
-    smooth_factor = torch.max(smooth_symbol_mod[:, :, 1:4])
-    print('Smoothing factor is', smooth_factor.item())
+    smooth_factor1 = torch.max(smooth_symbol_mod[:, :, 1:4]).item()
+    if do_print:
+        print('Smoothing factor is', smooth_factor1)
     # plot
-    theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor.item():.3f}', num_levels=32)
+    if do_plot:
+        theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor1:.3f}', num_levels=32)
 
-    # Smoother 2:
+    # Smoother 2 (block):
     # stencil for M
-    M_size = 3
-    pattern_M = torch.ones([M_size, M_size])
-    M = torch.ones([M_size, M_size])
-    center_M = torch.tensor([M_size // 2, M_size // 2])
-    M[center_M[0], center_M[1]] = 10
-    M = M * (2 / 51)
+    m_size = 3
+    pattern_m = torch.ones([m_size, m_size])
+    mat_m = torch.ones([m_size, m_size])
+    center_m = torch.tensor([m_size // 2, m_size // 2])
+    mat_m[center_m[0], center_m[1]] = 10
+    mat_m = mat_m * (2 / 51)
     # zero out "strict-upper" part to test centrosymmetric
-    if M_symmetric and M_size > 1:
-        M[utils.centrosymmetric_strict_upper_coord(M_size)] = 0
+    if m_symmetric and m_size > 1:
+        mat_m[utils.centrosymmetric_strict_upper_coord(m_size)] = 0
     # smoother
-    smooth_operator = SmoothSymbl2D(pattern_a=pattern_A, center_a=center_A,
-                                    pattern_m=pattern_M, center_m=center_M,
-                                    mat_a=A, centrosymmetric_a=A_symmetric,
-                                    mat_m=M, centrosymmetric_m=M_symmetric)
+    smooth_operator = SmoothSymbl2D(pattern_a=pattern_a, center_a=center_a,
+                                    pattern_m=pattern_m, center_m=center_m,
+                                    mat_a=mat_a, centrosymmetric_a=a_symmetric,
+                                    mat_m=mat_m, centrosymmetric_m=m_symmetric)
     smooth_operator.setup_theta(theta_grid)
     # smoother LFA
     smooth_symbol = smooth_operator.symbol()
     smooth_symbol_mod = torch.norm(smooth_symbol, dim=0)
-    smooth_factor = torch.max(smooth_symbol_mod[:, :, 1:4])
-    print('Smoothing factor is', smooth_factor.item())
+    smooth_factor2 = torch.max(smooth_symbol_mod[:, :, 1:4]).item()
+    if do_print:
+        print('Smoothing factor is', smooth_factor2)
     # plot
-    theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor.item():.3f}', num_levels=32)
+    if do_plot:
+        theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor2:.3f}', num_levels=32)
+        plt.show()
 
-    plt.show()
+    ret = [smooth_factor1, smooth_factor2]
+    return 0, ret
+
+
+if __name__ == "__main__":
+    sys.exit(main()[0])
