@@ -1,3 +1,4 @@
+import math
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,7 +6,7 @@ import matplotlib.colors as colors
 
 
 class Theta2D:
-    def __init__(self, num_theta, start=-torch.pi / 2, end=torch.pi / 2, quadrant=torch.tensor([0, 1, 2, 3])):
+    def __init__(self, num_theta, start=-math.pi / 2, end=math.pi / 2, quadrant=torch.tensor([0, 1, 2, 3])):
         """
         :param num_theta: the number of points in theta grid
         :param start:
@@ -23,8 +24,8 @@ class Theta2D:
         self.quadrant = quadrant
         # mesh quad    ^  [1, 3     -> x
         #            y |   0, 2]
-        self.quad = torch.tensor([[0, torch.pi,        0, torch.pi],
-                                  [0,        0, torch.pi, torch.pi]])[:, quadrant]
+        self.quad = torch.tensor([[0, math.pi,       0, math.pi],
+                                  [0,       0, math.pi, math.pi]])[:, quadrant]
         # (num_theta_x, num_theta_y, dim = 2, num_quad)
         self.theta_quad = self.theta_grid.unsqueeze(3) + self.quad[None, None, :, :]
 
@@ -32,7 +33,7 @@ class Theta2D:
         fig, ax = plt.subplots()
         theta_plot = np.zeros(2 * self.num_theta)
         theta_plot[0:self.num_theta] = self.theta
-        theta_plot[self.num_theta: 2 * self.num_theta] = self.theta + torch.pi
+        theta_plot[self.num_theta: 2 * self.num_theta] = self.theta + math.pi
         smooth_symbol_plot = np.zeros((2 * self.num_theta, 2 * self.num_theta))
         for j in range(self.quadrant.numel()):
             i = self.quadrant[j].item()
@@ -46,8 +47,8 @@ class Theta2D:
         sm = plt.cm.ScalarMappable(norm=norm, cmap=cp.cmap)
         # sm.set_array()
         fig.colorbar(sm, ticks=cp.levels)
-        plt.plot([np.min(theta_plot), np.max(theta_plot)], [0.5 * torch.pi, 0.5 * torch.pi], color='red')
-        plt.plot([0.5 * torch.pi, 0.5 * torch.pi], [np.min(theta_plot), np.max(theta_plot)], color='red')
+        plt.plot([np.min(theta_plot), np.max(theta_plot)], [0.5 * math.pi, 0.5 * math.pi], color='red')
+        plt.plot([0.5 * math.pi, 0.5 * math.pi], [np.min(theta_plot), np.max(theta_plot)], color='red')
         ax.set_title(title, fontfamily='sans-serif', fontweight='bold', fontsize=14)
         ax.set_xlabel(r'$\theta_x\in(-0.5\pi, 1.5\pi)$', fontsize=14)
         ax.set_ylabel(r'$\theta_y\in(-0.5\pi, 1.5\pi)$', fontsize=14)
