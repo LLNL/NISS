@@ -1,2 +1,2 @@
 # Public
-#__all__ = ['opt_smoother']
+__all__ = ['opt_smoother']

@@ -1,7 +1,6 @@
 import sys
 import math
 import unittest
-sys.path.append('../')
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 import niss.lfa.stencil as stencil  # noqa: E402

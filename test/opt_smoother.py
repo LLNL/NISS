@@ -1,7 +1,6 @@
 import sys
 import torch.nn as nn
 import matplotlib.pyplot as plt
-sys.path.append('..')
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 from niss.lfa.stencil import StencilSymbl2D  # noqa: E402
