@@ -1,8 +1,9 @@
 import sys
+import math
 import warnings
 import torch
 import matplotlib.pyplot as plt
-from lfa.theta import Theta2D
+from niss.lfa.theta import Theta2D  # noqa: E402
 
 
 class StencilSymbl2D:
@@ -109,7 +110,7 @@ def main(do_print=True, do_plot=True):
     mat_a[1, 1] = 8 / 3
     stencil_a = StencilSymbl2D(torch.ones(3, 3), torch.tensor([1, 1]), mat_a, centrosymmetric=True)
     # (pi/4, pi/4) symbol
-    theta_grid = Theta2D(1, start=torch.pi / 4, end=torch.pi / 4, quadrant=torch.tensor([0]))
+    theta_grid = Theta2D(1, start=math.pi / 4, end=math.pi / 4, quadrant=torch.tensor([0]))
     stencil_a.setup_theta(theta_grid)
     stencil_symbol = stencil_a.symbol()
     # modulus (absolute value)

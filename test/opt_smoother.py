@@ -1,13 +1,12 @@
-import numpy as np
 import sys
-import torch
 import torch.nn as nn
-# import torch.nn.functional as F
-# from torch.autograd import Variable
 import matplotlib.pyplot as plt
-import utils
-import lfa
-from ml.trainer import NNTrainer
+sys.path.append('..')
+from niss.utils.tensor import *  # noqa: E402
+from niss.lfa.theta import Theta2D  # noqa: E402
+from niss.lfa.stencil import StencilSymbl2D  # noqa: E402
+from niss.lfa.smooth import SmoothSymbl2D  # noqa: E402
+from niss.ml.trainer import NNTrainer  # noqa: E402
 
 
 # np.random.seed(0)
@@ -17,8 +16,8 @@ torch.set_printoptions(precision=5)
 
 
 # 0. Return smoother stencil values
-def test_smoother_optimal(smoother_stencil: lfa.StencilSymbl2D, operator_stencil=None,
-                          trainer=None, symbol_measure=None, do_print=True):
+def smoother_optimal(smoother_stencil: StencilSymbl2D, operator_stencil=None,
+                     trainer=None, symbol_measure=None, do_print=True):
     return smoother_stencil.stencil_value
 
 
@@ -34,14 +33,14 @@ class Net(nn.Module):
 
 
 # 1. Use NN to learn M
-def test_smoother_nn1(trainer, smoother_stencil: lfa.StencilSymbl2D, operator_stencil: lfa.StencilSymbl2D = None,
-                      symbol_measure=None, do_print=True):
+def smoother_nn1(trainer, smoother_stencil: StencilSymbl2D, operator_stencil: StencilSymbl2D = None,
+                 symbol_measure=None, do_print=True):
     # For reproducibility
     torch.manual_seed(0)
     # Clear smoother stencil's values
     smoother_stencil.stencil_value = None
     # theta grid only for high freq
-    theta_grid = lfa.Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
+    theta_grid = Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
     # setup theta grid for only high freq.
     operator_stencil.setup_theta(theta_grid)
     smoother_stencil.setup_theta(theta_grid)
@@ -58,7 +57,7 @@ def test_smoother_nn1(trainer, smoother_stencil: lfa.StencilSymbl2D, operator_st
 
         def forward(self, smoother_symbol):
             smoother_symbol = smoother_symbol.squeeze(-1)
-            symbol = utils.complex_multiply(self.operator_symbol, smoother_symbol)
+            symbol = complex_multiply(self.operator_symbol, smoother_symbol)
             if symbol.size(0) == 1:
                 symbol = 1 - symbol
             else:
@@ -83,16 +82,16 @@ def test_smoother_nn1(trainer, smoother_stencil: lfa.StencilSymbl2D, operator_st
 
 
 # 2. Use NN to learn M (Preferred. Use SmoothSymbl2D class)
-def test_smoother_nn2(trainer, smoother_stencil: lfa.StencilSymbl2D, operator_stencil: lfa.StencilSymbl2D = None,
-                      symbol_measure=None, do_print=True):
+def smoother_nn2(trainer, smoother_stencil: StencilSymbl2D, operator_stencil: StencilSymbl2D = None,
+                 symbol_measure=None, do_print=True):
     # For reproducibility
     torch.manual_seed(0)
     # Clear smoother stencil's values
     smoother_stencil.stencil_value = None
     # Create smoother class
-    smooth_operator = lfa.SmoothSymbl2D(stencil_a=operator_stencil, stencil_m=smoother_stencil)
+    smooth_operator = SmoothSymbl2D(stencil_a=operator_stencil, stencil_m=smoother_stencil)
     # theta grid only for high freq
-    theta_grid = lfa.Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
+    theta_grid = Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
     smooth_operator.setup_theta(theta_grid)
 
     # create a NN to learn the stencil weights of M
@@ -137,9 +136,9 @@ def main(smoother_size=3, num_steps=8000, do_print=True, do_plot=True):
     operator_matrix[operator_center[0], operator_center[1]] = 8 / 3
     # zero out "strict-upper" part to test centrosymmetric
     if operator_symmetric and operator_size > 1:
-        operator_matrix[utils.centrosymmetric_strict_upper_coord(operator_size)] = 0
-    operator_stencil = lfa.StencilSymbl2D(operator_pattern, operator_center, vmatrix=operator_matrix,
-                                          centrosymmetric=operator_symmetric)
+        operator_matrix[centrosymmetric_strict_upper_coord(operator_size)] = 0
+    operator_stencil = StencilSymbl2D(operator_pattern, operator_center, vmatrix=operator_matrix,
+                                      centrosymmetric=operator_symmetric)
     # stencil for M
     smoother_pattern = torch.ones(smoother_size, smoother_size)
     smoother_center = torch.tensor([smoother_size // 2, smoother_size // 2])
@@ -152,8 +151,8 @@ def main(smoother_size=3, num_steps=8000, do_print=True, do_plot=True):
         optimal_smoother_matrix[smoother_center[0], smoother_center[1]] = 10
         optimal_smoother_matrix = optimal_smoother_matrix * (2 / 51)
 
-    smoother_stencil = lfa.StencilSymbl2D(smoother_pattern, smoother_center, vmatrix=optimal_smoother_matrix,
-                                          centrosymmetric=smoother_symmetric)
+    smoother_stencil = StencilSymbl2D(smoother_pattern, smoother_center, vmatrix=optimal_smoother_matrix,
+                                      centrosymmetric=smoother_symmetric)
     # NN
     # optimizer_type = torch.optim.SGD
     # learning_rate = 0.0005
@@ -173,8 +172,8 @@ def main(smoother_size=3, num_steps=8000, do_print=True, do_plot=True):
                         num_prints=num_prints, do_print=do_print)
     err = 0
     ret = []
-    theta_grid = lfa.Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
-    for test in [test_smoother_optimal, test_smoother_nn1, test_smoother_nn2]:
+    theta_grid = Theta2D(128, quadrant=torch.tensor([1, 2, 3]))
+    for test in [smoother_optimal, smoother_nn1, smoother_nn2]:
         try:
             if do_print:
                 print(f'= = = = = = = = = {test.__name__} = = = = = = = = = = =')
@@ -186,19 +185,19 @@ def main(smoother_size=3, num_steps=8000, do_print=True, do_plot=True):
             # smoother matrix
             if smoother_symmetric:
                 smoother_matrix = torch.zeros(smoother_size, smoother_size)
-                smoother_matrix[utils.centrosymmetric_lower_coord(smoother_size)] = \
+                smoother_matrix[centrosymmetric_lower_coord(smoother_size)] = \
                     smoother_weights.squeeze().detach().clone()
-                utils.centrosymmetrize_upper(smoother_matrix)
+                centrosymmetrize_upper(smoother_matrix)
             else:
                 smoother_matrix = smoother_weights.detach().clone().reshape(smoother_size, smoother_size)
             if do_print:
                 print(f'* Smoother stencil matrix')
                 print(f'{np.array2string(smoother_matrix.detach().numpy(), precision=6)}')
-            # test smooth factor using smoother class
-            smooth_operator = lfa.SmoothSymbl2D(pattern_a=operator_pattern, center_a=operator_center,
-                                                pattern_m=smoother_pattern, center_m=smoother_center,
-                                                mat_a=operator_matrix, centrosymmetric_a=operator_symmetric,
-                                                mat_m=smoother_matrix, centrosymmetric_m=smoother_symmetric)
+            # get smooth factor using smoother class
+            smooth_operator = SmoothSymbl2D(pattern_a=operator_pattern, center_a=operator_center,
+                                            pattern_m=smoother_pattern, center_m=smoother_center,
+                                            mat_a=operator_matrix, centrosymmetric_a=operator_symmetric,
+                                            mat_m=smoother_matrix, centrosymmetric_m=smoother_symmetric)
             smooth_operator.setup_theta(theta_grid)
             smooth_symbol = smooth_operator.symbol()
             smooth_symbol_mod = torch.norm(smooth_symbol, dim=0)

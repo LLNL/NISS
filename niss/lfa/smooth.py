@@ -1,9 +1,8 @@
 import sys
-import torch
 import matplotlib.pyplot as plt
-from lfa.stencil import StencilSymbl2D
-from lfa.theta import Theta2D
-import utils
+from niss.lfa.stencil import StencilSymbl2D  # noqa: E402
+from niss.lfa.theta import Theta2D  # noqa: E402
+from niss.utils.tensor import *  # noqa: E402
 
 
 class SmoothSymbl2D:
@@ -58,7 +57,7 @@ class SmoothSymbl2D:
         return self.operator_stencil.is_symmetric() and self.smoother_stencil.is_symmetric()
 
     def symbol(self):
-        symbol = utils.complex_multiply(self.operator_symbol(), self.smoother_symbol())
+        symbol = complex_multiply(self.operator_symbol(), self.smoother_symbol())
         if symbol.size(0) == 1:
             symbol = 1 - symbol
         else:
@@ -80,7 +79,7 @@ def main(do_print=True, do_plot=True):
     mat_a[center_a[0], center_a[1]] = 8 / 3
     # zero out "strict-upper" part to test centrosymmetric
     if a_symmetric and a_size > 1:
-        mat_a[utils.centrosymmetric_strict_upper_coord(a_size)] = 0
+        mat_a[centrosymmetric_strict_upper_coord(a_size)] = 0
 
     # Smoother 1 (point-wise):
     # stencil for M
@@ -91,7 +90,7 @@ def main(do_print=True, do_plot=True):
     mat_m[center_m[0], center_m[1]] = 1 / 3
     # zero out "strict-upper" part to test centrosymmetric
     if m_symmetric and m_size > 1:
-        mat_m[utils.centrosymmetric_strict_upper_coord(m_size)] = 0
+        mat_m[centrosymmetric_strict_upper_coord(m_size)] = 0
     # smoothing operator
     smooth_operator = SmoothSymbl2D(pattern_a=pattern_a, center_a=center_a,
                                     pattern_m=pattern_m, center_m=center_m,
@@ -118,7 +117,7 @@ def main(do_print=True, do_plot=True):
     mat_m = mat_m * (2 / 51)
     # zero out "strict-upper" part to test centrosymmetric
     if m_symmetric and m_size > 1:
-        mat_m[utils.centrosymmetric_strict_upper_coord(m_size)] = 0
+        mat_m[centrosymmetric_strict_upper_coord(m_size)] = 0
     # smoother
     smooth_operator = SmoothSymbl2D(pattern_a=pattern_a, center_a=center_a,
                                     pattern_m=pattern_m, center_m=center_m,
