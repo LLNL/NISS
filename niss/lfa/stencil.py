@@ -3,6 +3,8 @@ import math
 import warnings
 import torch
 import matplotlib.pyplot as plt
+import logging
+from niss.config import NISSConfig
 from niss.lfa.theta import Theta2D  # noqa: E402
 
 
@@ -104,7 +106,7 @@ class StencilSymbl2D:
         return symbol
 
 
-def main(do_print=True, do_plot=True):
+def main():
     # stencil for A
     mat_a = -1 / 3 * torch.ones([3, 3])
     mat_a[1, 1] = 8 / 3
@@ -115,8 +117,8 @@ def main(do_print=True, do_plot=True):
     stencil_symbol = stencil_a.symbol()
     # modulus (absolute value)
     stencil_symbol_mod = torch.norm(stencil_symbol, dim=0)
-    if do_print:
-        print("LFA of (%f, %f) is %f" % (theta_grid.theta[0], theta_grid.theta[0], stencil_symbol_mod.item()))
+    logging.info(f'LFA of ({theta_grid.theta[0]/math.pi}PI, {theta_grid.theta[0]/math.pi}PI) is '
+                 f'{stencil_symbol_mod.item()}')
 
     # theta grid
     theta_grid = Theta2D(128)
@@ -127,16 +129,17 @@ def main(do_print=True, do_plot=True):
     symbol_max = torch.max(stencil_symbol_mod).item()
     symbol_min = torch.min(stencil_symbol_mod).item()
     ret = [symbol_max, symbol_min]
-    if do_print:
-        print('symbol A: ', 'max: ', symbol_max, 'min: ', symbol_min)
+    logging.info(f'symbol A: max = {symbol_max}, min = {symbol_min}')
     # plot
-    if do_plot:
+    if NISSConfig.plotting:
         theta_grid.plot(stencil_symbol_mod, title=f'Operator A symbol ({torch.min(stencil_symbol_mod).item():.2e}, '
                                                   f'{torch.max(stencil_symbol_mod).item():.2e})', num_levels=20)
-        plt.show()
 
     return 0, ret
 
 
 if __name__ == "__main__":
-    sys.exit(main()[0])
+    NISSConfig.plotting = True
+    err = main()[0]
+    plt.show()
+    sys.exit(err)
