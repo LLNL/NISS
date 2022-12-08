@@ -1,13 +1,16 @@
 import logging
 import math
 import unittest
-
-from niss.config import NISSConfig
+import sys
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path + "/../")
+from niss.config import NISSConfig # noqa: E402
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 import niss.lfa.stencil as stencil  # noqa: E402
 import niss.lfa.smooth as smooth  # noqa: E402
-import test.opt_smoother as opt_smoother  # noqa: E402
+import tests.opt_smoother as opt_smoother  # noqa: E402
 
 
 class TestTensorUtils(unittest.TestCase):
