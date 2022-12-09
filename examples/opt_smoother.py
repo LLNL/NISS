@@ -1,10 +1,7 @@
-import os
 import sys
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import logging
-dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(dir_path + "/../")
 from niss.config import NISSConfig  # noqa: E402
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
