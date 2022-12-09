@@ -1,12 +1,12 @@
-import sys
+import logging
 import math
 import unittest
-sys.path.append('../')
+from niss.config import NISSConfig  # noqa: E402
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 import niss.lfa.stencil as stencil  # noqa: E402
 import niss.lfa.smooth as smooth  # noqa: E402
-import test.opt_smoother as opt_smoother  # noqa: E402
+import examples.opt_smoother as opt_smoother  # noqa: E402
 
 
 class TestTensorUtils(unittest.TestCase):
@@ -82,7 +82,8 @@ class TestTensorUtils(unittest.TestCase):
 
 class TestLFASmooth(unittest.TestCase):
     def test_main(self):
-        err, ret = smooth.main(do_print=False, do_plot=False)
+        NISSConfig.plotting = False
+        err, ret = smooth.main()
         self.assertEqual(err, 0)
         self.assertAlmostEqual(ret[0], 0.3332664966583252)
         self.assertAlmostEqual(ret[1], 0.05882382392883301)
@@ -90,7 +91,8 @@ class TestLFASmooth(unittest.TestCase):
 
 class TestLFAStencil(unittest.TestCase):
     def test_main(self):
-        err, ret = stencil.main(do_print=False, do_plot=False)
+        NISSConfig.plotting = False
+        err, ret = stencil.main()
         self.assertEqual(err, 0)
         self.assertAlmostEqual(ret[0], 3.9997992515563965)
         self.assertAlmostEqual(ret[1], 0.0003012418746948242)
@@ -111,7 +113,8 @@ class TestLFATheta(unittest.TestCase):
 
 class TestOptSmoother(unittest.TestCase):
     def test_opt_smoother(self):
-        err, ret = opt_smoother.main(smoother_size=3, num_steps=200, do_print=False, do_plot=False)
+        NISSConfig.plotting = False
+        err, ret = opt_smoother.main(smoother_size=3, num_steps=200)
         self.assertEqual(err, 0)
         self.assertAlmostEqual(ret[0], 5.88238239e-02)
         self.assertAlmostEqual(ret[1], 6.30908394e+00)
@@ -119,4 +122,5 @@ class TestOptSmoother(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.WARNING)
     unittest.main()
