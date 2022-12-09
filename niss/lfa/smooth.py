@@ -1,5 +1,7 @@
 import sys
 import matplotlib.pyplot as plt
+import logging
+from niss.config import NISSConfig
 from niss.lfa.stencil import StencilSymbl2D  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 from niss.utils.tensor import *  # noqa: E402
@@ -65,7 +67,7 @@ class SmoothSymbl2D:
         return symbol
 
 
-def main(do_print=True, do_plot=True):
+def main():
     # centrosymmetric
     a_symmetric = True
     m_symmetric = True
@@ -101,10 +103,9 @@ def main(do_print=True, do_plot=True):
     smooth_symbol = smooth_operator.symbol()
     smooth_symbol_mod = torch.norm(smooth_symbol, dim=0)
     smooth_factor1 = torch.max(smooth_symbol_mod[:, :, 1:4]).item()
-    if do_print:
-        print('Smoothing factor is', smooth_factor1)
+    logging.info(f'Smoothing factor is {smooth_factor1:.6f}')
     # plot
-    if do_plot:
+    if NISSConfig.plotting:
         theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor1:.3f}', num_levels=32)
 
     # Smoother 2 (block):
@@ -128,10 +129,9 @@ def main(do_print=True, do_plot=True):
     smooth_symbol = smooth_operator.symbol()
     smooth_symbol_mod = torch.norm(smooth_symbol, dim=0)
     smooth_factor2 = torch.max(smooth_symbol_mod[:, :, 1:4]).item()
-    if do_print:
-        print('Smoothing factor is', smooth_factor2)
+    logging.info(f'Smoothing factor is {smooth_factor2:.6f}')
     # plot
-    if do_plot:
+    if NISSConfig.plotting:
         theta_grid.plot(smooth_symbol_mod, title=f'Smoothing factor {smooth_factor2:.3f}', num_levels=32)
         plt.show()
 
@@ -140,4 +140,7 @@ def main(do_print=True, do_plot=True):
 
 
 if __name__ == "__main__":
-    sys.exit(main()[0])
+    NISSConfig.plotting = True
+    err = main()[0]
+    plt.show()
+    sys.exit(err)
