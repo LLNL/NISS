@@ -1,11 +1,13 @@
 import logging
 import math
 import unittest
+import numpy
 from niss.config import NISSConfig  # noqa: E402
 from niss.utils.tensor import *  # noqa: E402
 from niss.lfa.theta import Theta2D  # noqa: E402
 import niss.lfa.stencil as stencil  # noqa: E402
 import niss.lfa.smooth as smooth  # noqa: E402
+import niss.multigrid.matrix as matrix  # noqa: E402
 import examples.opt_smoother as opt_smoother  # noqa: E402
 
 
@@ -119,6 +121,47 @@ class TestOptSmoother(unittest.TestCase):
         self.assertAlmostEqual(ret[0], 5.88238239e-02)
         self.assertAlmostEqual(ret[1], 6.30908394e+00)
         self.assertAlmostEqual(ret[2], 6.30908394e+00)
+
+
+class TestMultigridMatrix(unittest.TestCase):
+    def test_multigrid_matrix(self):
+        err, csr = matrix.main(ny=3, nx=2)
+        mat_arr = csr.csr.toarray()
+        sav_arr = numpy.array([[2.2, -0.1, -1.0, 0.0, 0.0, 0.0],
+                               [-0.1, 2.2, 0.0, -1.0, 0.0, 0.0],
+                               [-1.0, 0.0, 2.2, -0.1, -1.0, 0.0],
+                               [0.0, -1.0, -0.1, 2.2, 0.0, -1.0],
+                               [0.0, 0.0, -1.0, 0.0, 2.2, -0.1],
+                               [0.0, 0.0, 0.0, -1.0, -0.1, 2.2]]).astype(mat_arr.dtype)
+        self.assertEqual(err, 0)
+        self.assertTrue(numpy.array_equal(sav_arr, mat_arr))
+        #
+        err, csr = matrix.main(ny=2, nx=3)
+        mat_arr = csr.csr.toarray()
+        sav_arr = numpy.array([[2.2, -0.1, 0.0, -1.0, 0.0, 0.0],
+                               [-0.1, 2.2, -0.1, 0.0, -1.0, 0.0],
+                               [0.0, -0.1, 2.2, 0.0, 0.0, -1.0],
+                               [-1.0, 0.0, 0.0, 2.2, -0.1, 0.0],
+                               [0.0, -1.0, 0.0, -0.1, 2.2, -0.1],
+                               [0.0, 0.0, -1.0, 0.0, -0.1, 2.2]]).astype(mat_arr.dtype)
+        self.assertEqual(err, 0)
+        self.assertTrue(numpy.array_equal(sav_arr, mat_arr))
+        #
+        err, csr = matrix.main(ny=3, nx=1)
+        mat_arr = csr.csr.toarray()
+        sav_arr = numpy.array([[2.2, -1.0, 0.0],
+                               [-1.0, 2.2, -1.0],
+                               [0.0, -1.0, 2.2]]).astype(mat_arr.dtype)
+        self.assertEqual(err, 0)
+        self.assertTrue(numpy.array_equal(sav_arr, mat_arr))
+        #
+        err, csr = matrix.main(ny=1, nx=3)
+        mat_arr = csr.csr.toarray()
+        sav_arr = numpy.array([[2.2, -0.1, 0.0],
+                               [-0.1, 2.2, -0.1],
+                               [0.0, -0.1, 2.2]]).astype(mat_arr.dtype)
+        self.assertEqual(err, 0)
+        self.assertTrue(numpy.array_equal(sav_arr, mat_arr))
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ setup(name="niss",
       install_requires=['torch',
                         'pytest',
                         'matplotlib',
+                        'scipy',
                         'numpy'],
       python_requires='>=3.8'
       )
